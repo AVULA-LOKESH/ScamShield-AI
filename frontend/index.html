@@ -1,80 +1,70 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ScamShield AI</title>
+
   <style>
     * {
-      box-sizing: border-box
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f3f6fb;
-      color: #172033
+      color: #172033;
     }
 
     header {
       background: #14213d;
       color: white;
-      padding: 25px max(5%, calc((100% - 1050px)/2))
+      padding: 22px 5%;
     }
 
     header h1 {
-      margin: 0 0 6px
+      margin: 0 0 6px;
     }
 
     header p {
       margin: 0;
-      color: #d7e1f5
+      color: #d7e1f5;
     }
 
     main {
       max-width: 1050px;
       margin: 28px auto;
-      padding: 0 18px
+      padding: 0 18px;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 14px
-    }
-
-    .card,
-    .panel {
+    .panel,
+    .card {
       background: white;
       border-radius: 12px;
-      padding: 19px;
-      box-shadow: 0 3px 14px #182b4810
+      padding: 20px;
+      box-shadow: 0 3px 14px #182b4810;
     }
 
-    .card span {
-      color: #68758b;
-      font-size: 14px
+    .auth {
+      max-width: 420px;
+      margin: 45px auto;
     }
 
-    .card strong {
-      display: block;
-      font-size: 30px;
-      margin-top: 8px
-    }
-
-    .panel {
-      margin-top: 20px
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccd5e3;
+      border-radius: 8px;
+      font: 15px Arial;
     }
 
     textarea {
-      width: 100%;
       min-height: 125px;
-      padding: 13px;
-      border: 1px solid #ccd5e3;
-      border-radius: 8px;
-      font: 16px Arial;
-      resize: vertical
+      resize: vertical;
     }
 
     button {
@@ -85,11 +75,42 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 12px
+      margin-top: 10px;
     }
 
     button.secondary {
-      background: #68758b
+      background: #68758b;
+    }
+
+    .full {
+      width: 100%;
+    }
+
+    .link {
+      color: #2457d6;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .card span {
+      color: #68758b;
+      font-size: 14px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 30px;
+      margin-top: 8px;
+    }
+
+    .panel {
+      margin-top: 20px;
     }
 
     .result {
@@ -97,100 +118,395 @@
       padding: 14px;
       border-radius: 8px;
       background: #f3f6fb;
-      white-space: pre-wrap
+      white-space: pre-wrap;
     }
 
     .history-item {
       padding: 12px 0;
-      border-bottom: 1px solid #e7ebf2
+      border-bottom: 1px solid #e7ebf2;
     }
 
     .muted {
       color: #68758b;
-      font-size: 13px
+      font-size: 13px;
     }
 
-    footer {
-      max-width: 1050px;
-      margin: 20px auto 35px;
-      padding: 0 18px;
-      color: #68758b;
-      font-size: 13px
+    #dashboard {
+      display: none;
+    }
+
+    #error {
+      color: #c62828;
     }
   </style>
 </head>
 
 <body>
+
   <header>
     <h1>🛡️ ScamShield AI</h1>
-    <p>Demo dashboard for checking suspicious messages and links</p>
+    <p>AI-powered suspicious message detection</p>
   </header>
-  <main>
+
+  <!-- LOGIN AND REGISTER -->
+  <main id="authSection">
+    <section class="panel auth">
+
+      <div id="loginBox">
+        <h2>Welcome Back!</h2>
+        <p>Login to your ScamShield AI account.</p>
+
+        <input id="loginEmail" type="email" placeholder="Email address">
+        <input id="loginPassword" type="password" placeholder="Password">
+
+        <button class="full" onclick="login()">Login</button>
+
+        <p>Don't have an account?
+          <span class="link" onclick="showRegister()">Register</span>
+        </p>
+      </div>
+
+      <div id="registerBox" hidden>
+        <h2>Create Account</h2>
+        <p>Register to use ScamShield AI.</p>
+
+        <input id="regName" placeholder="Full name">
+        <input id="regEmail" type="email" placeholder="Email address">
+        <input id="regPassword" type="password" placeholder="Password (minimum 8 characters)">
+
+        <button class="full" onclick="register()">Register</button>
+
+        <p>Already have an account?
+          <span class="link" onclick="showLogin()">Login</span>
+        </p>
+      </div>
+
+      <p id="error"></p>
+    </section>
+  </main>
+
+  <!-- DASHBOARD -->
+  <main id="dashboard">
+
+    <section class="panel">
+      <span id="welcome"></span>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </section>
+
     <section class="cards">
       <div class="card"><span>Total Scans</span><strong id="total">0</strong></div>
       <div class="card"><span>High Risk</span><strong id="high">0</strong></div>
       <div class="card"><span>Medium Risk</span><strong id="medium">0</strong></div>
       <div class="card"><span>Low Risk</span><strong id="low">0</strong></div>
     </section>
+
     <section class="panel">
-      <h2>Scan a message</h2>
-      <p>Paste a message or URL below. Do not paste real passwords, OTPs, or private information.</p>
+      <h2>Scan a Message</h2>
+      <p>Paste a message or URL. Never share real passwords or OTPs.</p>
+
       <textarea id="message"
         placeholder="Example: Congratulations! You won a prize. Click here to claim your reward."></textarea>
-      <br><button id="scanBtn" onclick="scanMessage()">Scan Message</button>
+
+      <button onclick="scanMessage()">Scan Message</button>
       <div id="result" class="result" hidden></div>
     </section>
+
     <section class="panel">
       <h2>Recent Scan History</h2>
-      <button class="secondary" onclick="clearHistory()">Clear History</button>
-      <div id="history" style="margin-top:12px">Loading history...</div>
+      <button class="secondary" onclick="clearHistory()">Clear My History</button>
+      <div id="history">Loading history...</div>
     </section>
+
   </main>
-  <footer>Student demonstration only. Results are not a guarantee that a message is safe or fraudulent.</footer>
+
   <script>
     const API = "https://scamshield-ai-z5fs.onrender.com";
+
+    let token = localStorage.getItem("scamshield_token");
+
+    function showError(message) {
+      document.getElementById("error").textContent = message;
+    }
+
+    function showLogin() {
+      document.getElementById("loginBox").hidden = false;
+      document.getElementById("registerBox").hidden = true;
+      showError("");
+    }
+
+    function showRegister() {
+      document.getElementById("loginBox").hidden = true;
+      document.getElementById("registerBox").hidden = false;
+      showError("");
+    }
+
+    function showDashboard(user) {
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      document.getElementById("welcome").textContent =
+        "Welcome, " + user.name + "!";
+      loadDashboard();
+    }
+
+    function showAuth() {
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("authSection").style.display = "block";
+      showLogin();
+    }
+
+    async function apiFetch(path, options = {}) {
+      const headers = {
+        ...(options.headers || {}),
+        "Authorization": "Bearer " + token
+      };
+
+      return fetch(API + path, {
+        ...options,
+        headers
+      });
+    }
+
+    async function register() {
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value;
+
+      if (!name || !email || !password) {
+        showError("Please fill all fields.");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.detail || "Registration failed.");
+          return;
+        }
+
+        alert("Registration successful! Please login.");
+        showLogin();
+
+      } catch (error) {
+        showError("Cannot connect to backend.");
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email || !password) {
+        showError("Enter email and password.");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.detail || "Login failed.");
+          return;
+        }
+
+        token = data.access_token;
+        localStorage.setItem("scamshield_token", token);
+
+        await checkLogin();
+
+      } catch (error) {
+        showError("Cannot connect to backend.");
+      }
+    }
+
+    async function checkLogin() {
+      if (!token) {
+        showAuth();
+        return;
+      }
+
+      try {
+        const response = await apiFetch("/me");
+
+        if (!response.ok) {
+          logout();
+          return;
+        }
+
+        const user = await response.json();
+        showDashboard(user);
+
+      } catch (error) {
+        showAuth();
+        showError("Backend unavailable. Please try again.");
+      }
+    }
+
+    function logout() {
+      token = null;
+      localStorage.removeItem("scamshield_token");
+      showAuth();
+    }
+
     async function loadDashboard() {
       try {
-        const r = await fetch(API + "/stats"); if (!r.ok) throw new Error("Backend unavailable");
-        const s = await r.json();
-        document.getElementById("total").textContent = s.total_scans;
-        document.getElementById("high").textContent = s.high_risk;
-        document.getElementById("medium").textContent = s.medium_risk;
-        document.getElementById("low").textContent = s.low_risk;
+        const response = await apiFetch("/stats");
+
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
+        if (!response.ok) throw new Error();
+
+        const data = await response.json();
+
+        document.getElementById("total").textContent = data.total_scans;
+        document.getElementById("high").textContent = data.high_risk;
+        document.getElementById("medium").textContent = data.medium_risk;
+        document.getElementById("low").textContent = data.low_risk;
+
         await loadHistory();
-      } catch (e) { document.getElementById("result").hidden = false; document.getElementById("result").textContent = "Cannot connect to backend. Start the backend terminal first."; }
+
+      } catch (error) {
+        document.getElementById("result").hidden = false;
+        document.getElementById("result").textContent =
+          "Cannot connect to backend.";
+      }
     }
+
     async function scanMessage() {
       const text = document.getElementById("message").value.trim();
       const out = document.getElementById("result");
+
       out.hidden = false;
-      if (!text) { out.textContent = "Please enter a message first."; return; }
+
+      if (!text) {
+        out.textContent = "Please enter a message first.";
+        return;
+      }
+
       out.textContent = "Scanning...";
+
       try {
-        const r = await fetch(API + "/predict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
-        const data = await r.json();
-        if (data.error) { out.textContent = data.error; return; }
-        out.textContent = `${data.result}\nRisk level: ${data.risk}\nDemo risk score: ${data.score}%\n\nWhy flagged:\n- ${data.reasons.join("\n- ")}\n\nLinks found: ${data.urls_found.length}\n\n${data.disclaimer}`;
+        const response = await apiFetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          out.textContent = data.detail || data.error || "Scan failed.";
+          return;
+        }
+
+        out.textContent =
+          `${data.result}
+Risk level: ${data.risk}
+Demo risk score: ${data.score}%
+
+Why flagged:
+- ${data.reasons.join("\n- ")}
+
+Links found: ${data.urls_found.length}
+
+${data.disclaimer}`;
+
         await loadDashboard();
-      } catch (e) { out.textContent = "Could not reach the backend. Check that its terminal is running."; }
+
+      } catch (error) {
+        out.textContent = "Could not reach the backend.";
+      }
     }
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c]));
+    }
+
     async function loadHistory() {
       const box = document.getElementById("history");
+
       try {
-        const r = await fetch(API + "/history"); const items = await r.json();
-        if (!items.length) { box.textContent = "No scans yet."; return; }
-        box.innerHTML = items.map(x => `<div class="history-item"><b>${escapeHtml(x.risk)} risk · ${x.score}%</b><div>${escapeHtml(x.message)}</div><div class="muted">${escapeHtml(x.created_at)}</div></div>`).join("");
-      } catch (e) { box.textContent = "History unavailable."; }
+        const response = await apiFetch("/history");
+
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
+        if (!response.ok) throw new Error();
+
+        const items = await response.json();
+
+        if (!items.length) {
+          box.textContent = "No scans yet.";
+          return;
+        }
+
+        box.innerHTML = items.map(item =>
+          `<div class="history-item">
+        <b>${escapeHtml(item.risk)} risk · ${item.score}%</b>
+        <div>${escapeHtml(item.message)}</div>
+        <div class="muted">${escapeHtml(item.created_at)}</div>
+      </div>`
+        ).join("");
+
+      } catch (error) {
+        box.textContent = "History unavailable.";
+      }
     }
+
     async function clearHistory() {
-      if (!confirm("Clear all scan history?")) return;
-      await fetch(API + "/history", { method: "DELETE" });
-      document.getElementById("result").hidden = true;
-      await loadDashboard();
+      if (!confirm("Clear your scan history?")) return;
+
+      try {
+        const response = await apiFetch("/history", {
+          method: "DELETE"
+        });
+
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
+        if (!response.ok) throw new Error();
+
+        document.getElementById("result").hidden = true;
+        await loadDashboard();
+
+      } catch (error) {
+        alert("Could not clear history.");
+      }
     }
-    loadDashboard();
+
+    checkLogin();
   </script>
+
 </body>
 
 </html>
