@@ -131,6 +131,24 @@
       font-size: 13px;
     }
 
+    .url-card {
+      background: white;
+      border: 1px solid #dce3ee;
+      border-radius: 8px;
+      padding: 13px;
+      margin: 10px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .url-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .url-card p {
+      margin: 6px 0;
+    }
+
     #dashboard {
       display: none;
     }
@@ -419,22 +437,55 @@
           return;
         }
 
-        out.textContent =
-          `${data.result}
-Risk level: ${data.risk}
-Demo risk score: ${data.score}%
+        const urls = Array.isArray(data.url_analysis)
+          ? data.url_analysis
+          : [];
 
-Why flagged:
-- ${data.reasons.join("\n- ")}
+        const reasons = Array.isArray(data.reasons)
+          ? data.reasons
+          : [];
 
-Links found: ${data.urls_found.length}
+        const urlCards = urls.map(item => {
+          const itemReasons = Array.isArray(item.reasons)
+            ? item.reasons
+            : [];
 
-${data.disclaimer}`;
+          return `
+            <div class="url-card">
+              <h3>🔗 ${escapeHtml(item.url || "Unknown URL")}</h3>
+              <p><b>Domain:</b> ${escapeHtml(item.domain || "Unknown")}</p>
+              <p><b>Website Category:</b> ${escapeHtml(item.category || "Unknown")}</p>
+              <p class="muted">${escapeHtml(item.category_note || "Category details unavailable.")}</p>
+              <p><b>URL Risk:</b> ${escapeHtml(item.risk || "Unknown")} (${Number(item.score) || 0}%)</p>
+              <p><b>Why flagged:</b></p>
+              <ul>
+                ${itemReasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("")}
+              </ul>
+              <p><b>Recommendation:</b> ${escapeHtml(item.recommendation || "Verify this website carefully before sharing information.")}</p>
+            </div>
+          `;
+        }).join("");
+
+        out.innerHTML = `
+          <h2>${escapeHtml(data.result || "Scan Complete")}</h2>
+          <p><b>Overall Message Risk:</b> ${escapeHtml(data.risk || "Unknown")}</p>
+          <p><b>Demo Risk Score:</b> ${Number(data.score) || 0}%</p>
+
+          <h3>Why flagged:</h3>
+          <ul>
+            ${reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("")}
+          </ul>
+
+          <h3>Individual URL Analysis (${urls.length})</h3>
+          ${urlCards || "<p>No URL found in this message.</p>"}
+
+          <p class="muted">${escapeHtml(data.disclaimer || "Student demo only.")}</p>
+        `;
 
         await loadDashboard();
 
       } catch (error) {
-        out.textContent = "Could not reach the backend.";
+        out.textContent = "Could not reach the backend. Please try again.";
       }
     }
 
@@ -470,10 +521,10 @@ ${data.disclaimer}`;
 
         box.innerHTML = items.map(item =>
           `<div class="history-item">
-        <b>${escapeHtml(item.risk)} risk · ${item.score}%</b>
-        <div>${escapeHtml(item.message)}</div>
-        <div class="muted">${escapeHtml(item.created_at)}</div>
-      </div>`
+            <b>${escapeHtml(item.risk)} risk · ${item.score}%</b>
+            <div>${escapeHtml(item.message)}</div>
+            <div class="muted">${escapeHtml(item.created_at)}</div>
+          </div>`
         ).join("");
 
       } catch (error) {
